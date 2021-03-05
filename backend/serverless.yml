@@ -73,6 +73,10 @@ functions:
         Action:
           - dynamodb:Query
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+      - Effect: Allow
+        Action:
+          - s3:*
+        Resource: arn:aws:s3:::${self:provider.environment.S3_BUCKET_NAME}/*
 
   # TODO: Configure this function
   CreateTodo:
@@ -150,6 +154,10 @@ functions:
         Action:
           - s3:*
         Resource: arn:aws:s3:::${self:provider.environment.S3_BUCKET_NAME}/*
+      - Effect: Allow
+        Action:
+          - dynamodb:UpdateItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
 
 resources:
   Resources:
@@ -188,5 +196,9 @@ resources:
               AllowedHeaders:
                 - '*'
               AllowedMethods:
+                - GET
                 - PUT
+                - POST
+                - DELETE
+                - HEAD
               MaxAge: 600

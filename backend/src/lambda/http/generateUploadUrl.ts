@@ -1,7 +1,7 @@
 import 'source-map-support/register'
 
 import { APIGatewayProxyEvent, APIGatewayProxyResult, APIGatewayProxyHandler}  from 'aws-lambda'
-import { getSignedUrl } from "../../services/ToDoService";
+import { getSignedUrl , updateTodoAttachmentUrl } from "../../services/ToDoService";
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     
@@ -9,7 +9,15 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
     console.log("Processing Event ", event);
     const todoId = event.pathParameters.todoId;
 
+    const authorization = event.headers.Authorization;
+    const split = authorization.split(' ');
+    const jwtToken = split[1];
+
     const URL = await getSignedUrl(todoId);
+
+    const updateImage = await updateTodoAttachmentUrl(todoId, jwtToken);
+
+    console.log(updateImage);
 
     return {
         statusCode: 200,

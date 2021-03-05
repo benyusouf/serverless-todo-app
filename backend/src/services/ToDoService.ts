@@ -37,3 +37,8 @@ export function deleteToDo(todoId: string, jwtToken: string): Promise<string> {
 export function getSignedUrl(todoId: string): Promise<string> {
     return repo.getSignedUrl(todoId);
 }
+
+export function updateTodoAttachmentUrl(todoId: string, jwtToken: string): Promise<string> {
+    const userId = parseUserId(jwtToken);
+    return repo.updateTodoAttachmentUrl(todoId, userId);
+}

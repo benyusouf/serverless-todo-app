@@ -3,13 +3,13 @@ import {DocumentClient} from "aws-sdk/clients/dynamodb";
 import {Types} from 'aws-sdk/clients/s3';
 import {TodoItem} from "../models/TodoItem";
 import {TodoUpdate} from "../models/TodoUpdate";
-import AWSXRay from "aws-xray-sdk"; 
+// import AWSXRay from "aws-xray-sdk"; 
 
-const XAWS = AWSXRay.CaptureAWS(AWS);
+// const XAWS = AWSXRay.CaptureAWS(AWS);
 
 export class ToDoRepository {
     constructor(
-        private readonly docClient: DocumentClient = new XAWS.DynamoDB.DocumentClient(),
+        private readonly docClient: DocumentClient = new AWS.DynamoDB.DocumentClient(),
         private readonly s3Client: Types = new AWS.S3({signatureVersion: 'v4'}),
         private readonly todoTable = process.env.TODOS_TABLE,
         private readonly s3BucketName = process.env.S3_BUCKET_NAME) {
@@ -108,5 +108,31 @@ export class ToDoRepository {
         console.log(url);
 
         return url as string;
+    }
+
+    async updateTodoAttachmentUrl(todoId: string, userId: string): Promise<string> {
+
+        console.log('Updating todo attachment url');
+
+        const params = {
+            TableName: this.todoTable,
+            Key: {
+                'userId': userId,
+                'todoId': todoId
+            },
+            UpdateExpression: 'set #a = :a',
+            ExpressionAttributeNames: {
+                '#a': 'attachmentUrl'
+            },
+            ExpressionAttributeValues: {
+                ':a': `https://${process.env.S3_BUCKET_NAME}.s3.amazonaws.com/${todoId}.png`
+            },
+            ReturnValues: 'ALL_NEW'
+        };
+
+        const result = await this.docClient.update(params).promise();
+        console.log(result);
+
+        return '' as string;
     }
 }
